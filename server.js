@@ -1,17 +1,24 @@
-var Crawler = require("crawler");
- 
-var c = new Crawler({
-    maxConnections : 10,
-    // This will be called for each crawled page
-    callback : function (error, res, done) {
-        if(error){
-            console.log(error);
-        }else{
-            var $ = res.$;
-            // $ is Cheerio by default
-            //a lean implementation of core jQuery designed specifically for the server
-            console.log($("title").text());
-        }
-        done();
-    }
-});
+var cheerio = require('cheerio')
+var axios = require('axios')
+
+function getPedals(){
+    const output = []
+    axios.get('https://reverb.com/marketplace?query=tube%20screamer')
+        .then(response => {
+            const $ = cheerio.load(response.data)
+
+            $('a.csp-square-card__inner').each(function(i, element){
+                console.log(i, 
+                    $(element)
+                    .children()
+                    .text()
+                )
+            })
+        })
+
+    return output
+}
+
+getPedals()
+
+
