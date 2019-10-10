@@ -1,24 +1,31 @@
-var cheerio = require('cheerio')
-var axios = require('axios')
+var cheerio = require('cheerio');
+var axios = require('axios');
 
-function getPedals(){
-    const output = []
-    axios.get('https://reverb.com/marketplace?query=tube%20screamer')
-        .then(response => {
-            const $ = cheerio.load(response.data)
+async function getPedals(next) {
+	const result = await axios.get(
+		'https://reverb.com/marketplace?query=tube%20screamer'
+	);
 
-            $('a.csp-square-card__inner').each(function(i, element){
-                console.log(i, 
-                    $(element)
-                    .children()
-                    .text()
-                )
-            })
-        })
-
-    return output
+	next(result);
 }
 
-getPedals()
+function getCheerioElements(result) {
+	const $ = cheerio.load(result.data);
+	const output = [];
+	$('a.csp-square-card__inner').each(function(index, element) {
+		const title = $(element)
+			.children()
+			.text();
+		const link = $(element).attr('href');
+		const price = '$' + title.substr(title.indexOf('$') + 1);
+		output.push({
+			index,
+			title,
+			link,
+			price
+		});
+	});
+	console.log(output);
+}
 
-
+getPedals(getCheerioElements);
